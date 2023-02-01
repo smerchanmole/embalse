@@ -14,12 +14,15 @@ import time
 import datetime
 import re
 
-
+import sys #para cargar el directorio padre con las claves
 
 
 # importamos la libreria de conexion a postgres. Antes hay que instalarla con pip3 install psycopg2-binary
 import psycopg2
 
+# ## AÑADIMOS LAS VARIABLES CON LOS DATOS DE ACCESO A LA BBDD
+sys.path.append ('..')
+from connections import *
 
 # ## Funciones para el acceso a base de datos
 
@@ -173,8 +176,6 @@ print (volumen)
 
 ##insertamos las ultimas 24 horas en la tabla con un UPSERT 
 
-#cargamos los datos de conexion
-from ../datos_personales import * 
 
 
 # In[46]:
