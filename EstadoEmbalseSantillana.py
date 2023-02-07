@@ -1,33 +1,27 @@
-#!/usr/bin/env python
-# coding: utf-8
+# ####################################################################### #
+# APP: Web scrapper to fetch reservoir water capacity                     #
+# Reservoir name: Embalse de Santillana                                   #
+#                                                                         #
+#                                                                         #
+# ####################################################################### #
 
-# # Datos estado embalse de Santillana : manzanares el Real
-
-# In[27]:
-
-
-# importamos
+# import pandas to manage data, request & re  to de the scrapping, json to 
+# manage the jsons and sys to load a file with the passwords, psycopg2 to 
+# load data to postgress database
 import pandas as pd
 import requests
 import json
 import time
 import datetime
 import re
+import psycopg2 #to install with pip3 install psycopg2-binary
 
-import sys #para cargar el directorio padre con las claves
-
-
-# importamos la libreria de conexion a postgres. Antes hay que instalarla con pip3 install psycopg2-binary
-import psycopg2
-
-# ## AÑADIMOS LAS VARIABLES CON LOS DATOS DE ACCESO A LA BBDD
+# Load data from parent directory (that is why we need sys)
 sys.path.append ('..')
 from connections import *
 
+
 # ## Funciones para el acceso a base de datos
-
-# In[2]:
-
 
 # La funciona de conexión a la base de datos para peticiones
 def conectar_bd (PS_HOST, PS_PORT, PS_USER, PS_PASS, PS_DB, PS_QUERY):
