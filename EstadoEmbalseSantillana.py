@@ -15,6 +15,7 @@ import time
 import datetime
 import re
 import psycopg2 #to install with pip3 install psycopg2-binary
+import sys #to access parent directory
 
 # Load data from parent directory (that is why we need sys)
 sys.path.append ('..')
@@ -91,38 +92,39 @@ def escribir_log (PS_CURSOR, PS_CONN, ip, comando, extra):
 
 #Here is the URI where the data of the reservoir is noted.
 uri_total= "https://www.embalses.net/pantano-1013-santillana.html"
-print(uri_total)
+print("We use this URL: "+uri_total)
 
 
 # Make the request and save the html response.
 response=requests.get(uri_total, verify=False)
-print(response)
-
-# Show the html code 
-response.text
-
+print("The URL Response is:",response)
 
 #Search the part of the page where the data is printed
 indice=response.text.find('Campo"><strong>Agua embalsada')
-print (indice)
+print ("The text 'Agua Embalsada is at character: ",indice)
 
 #let's fetch 300 chars to look deeper
 crawler=response.text[indice:indice+300]
+print ("# ################# #")
+print ("The 300 chars after the index are:")
+print ("# ################# #")
 print (crawler)
+print ("# ################# #")
 
 #Now we take the date from the html code
 indice_fecha=crawler.find("strong")
-print (indice_fecha)
+print ("date index:",indice_fecha)
 fecha=crawler[indice_fecha+23: indice_fecha+23+10]
-print (fecha)
+print ("Date fetched:",fecha)
 
 #format date in postgreSQL and forget the time
 anio=fecha[6:10]
 mes=fecha[3:5]
 dia=fecha[0:2]
+print ("Date we understand:")
 print ("dia",dia,"mes",mes,"anio",anio)
 fecha=anio+"/"+mes+"/"+dia
-print (fecha)
+print("Date Formated:",fecha)
 
 #Fetch the volume  
 #1st remove the date
@@ -130,16 +132,14 @@ volumen=crawler[indice_fecha+23+10+10:indice_fecha+23+10+100]
 #print (volumen)
 indice_volumen=volumen.find("strong")
 volumen=volumen[indice_volumen+7:indice_volumen+7+5]
-print(volumen)
-
+print ("Text with the Volume to fetch:",volumen)
 
 #Fetch the numbers 
-print(volumen)
 lista_numeros_cogidos=[float(s) for s in re.findall(r'-?\d+\.?\d*',volumen)]
 
 volumen=lista_numeros_cogidos[0]
 volumen=str(volumen)
-print (volumen)
+print ("We fetch the volume:",volumen)
 
 # Write date and volume in postgreSQL database
 SQLupsert="insert into public.embalse (fecha, volumen) "
@@ -147,14 +147,12 @@ SQLupsert+="values ('"+fecha+"',"+volumen+") on conflict(fecha) do nothing"
 
 #Now we generate the connection
 cur,con = conectar_bd (database_ip,database_port,database_user,database_password, database_db,"select count(*) from public.sonda_colmenar")
-print(SQLupsert)
+print("SQL to write:",SQLupsert)
 
 # Execute the upsert
 cur.execute(SQLupsert)
 
-#Update the logs
-   
-#al final del for actualizamos logs
+#Update the logs (you can comment this line if there is no log table)
 escribir_log(cur, con, "192.168.1.11","ACTUALIZAMOS embalse","operacion normal")
 
 # Commit the data on database (just to make sure)
@@ -162,3 +160,4 @@ con.commit()
 
 # Close the connection
 cerrar_conexion_bbdd (cur,con)
+print ("ALL DONE!")
